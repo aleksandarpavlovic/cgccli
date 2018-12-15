@@ -38,18 +38,6 @@ public class ProjectListExecutor implements HttpExecutor {
         return requestBuilder.build();
     }
 
-    private String extractNextPageUrl(JsonObject responseJson) {
-        JsonArray links = responseJson.getAsJsonArray("links");
-        if (links == null || links.size() == 0)
-            return null;
-        for (JsonElement link: links) {
-            if ("next".equals(link.getAsJsonObject().get("rel").getAsString())) {
-                return link.getAsJsonObject().get("href").getAsString();
-            }
-        }
-        return null;
-    }
-
     private void processResponseBody(JsonObject responseJson) {
         System.out.println(responseJson.toString());
     }
