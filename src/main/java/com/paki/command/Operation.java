@@ -3,8 +3,7 @@ package com.paki.command;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 public class Operation implements OptionsHolder, AssignmentsHolder {
     @Getter @Setter
@@ -15,7 +14,7 @@ public class Operation implements OptionsHolder, AssignmentsHolder {
     AssignmentsHolder assignmentsHolder = new DefaultAssignmentsHolder();
 
     @Override
-    public List<Assignment> getAssignments() {
+    public Set<Assignment> getAssignments() {
         return assignmentsHolder.getAssignments();
     }
 
@@ -25,12 +24,12 @@ public class Operation implements OptionsHolder, AssignmentsHolder {
     }
 
     @Override
-    public void addAllAssignments(List<Assignment> assignments) {
+    public void addAllAssignments(Set<Assignment> assignments) {
         assignmentsHolder.addAllAssignments(assignments);
     }
 
     @Override
-    public List<Option> getOptions() {
+    public Set<Option> getOptions() {
         return optionsHolder.getOptions();
     }
 
@@ -40,32 +39,47 @@ public class Operation implements OptionsHolder, AssignmentsHolder {
     }
 
     @Override
-    public void addAllOptions(List<Option> options) {
+    public void addAllOptions(Set<Option> options) {
         optionsHolder.addAllOptions(options);
     }
 
-    public static class OperationBuilder {
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Operation operation = (Operation) o;
+        return Objects.equals(resource, operation.resource) &&
+                Objects.equals(action, operation.action);
+    }
+
+    @Override
+    public int hashCode() {
+
+        return Objects.hash(resource, action);
+    }
+
+    public static class Builder {
         String resource;
         String action;
-        List<Option> options = new ArrayList<>();
-        List<Assignment> assignments = new ArrayList<>();
+        Set<Option> options = new HashSet<>();
+        Set<Assignment> assignments = new HashSet<>();
 
-        public OperationBuilder withResource(String resource) {
+        public Builder withResource(String resource) {
             this.resource = resource;
             return this;
         }
 
-        public OperationBuilder withAction(String action) {
+        public Builder withAction(String action) {
             this.action = action;
             return this;
         }
 
-        public OperationBuilder withOption(Option option) {
+        public Builder withOption(Option option) {
             this.options.add(option);
             return this;
         }
 
-        public OperationBuilder withAssignment(Assignment assignment) {
+        public Builder withAssignment(Assignment assignment) {
             this.assignments.add(assignment);
             return this;
         }

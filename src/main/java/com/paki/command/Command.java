@@ -4,17 +4,18 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Objects;
+import java.util.Set;
 
 @NoArgsConstructor
 public class Command implements OptionsHolder {
     @Getter @Setter
     Operation operation;
-    OptionsHolder optionsHolder;
+    OptionsHolder optionsHolder = new DefaultOptionsHolder();
 
     @Override
-    public List<Option> getOptions() {
+    public Set<Option> getOptions() {
         return optionsHolder.getOptions();
     }
 
@@ -24,21 +25,21 @@ public class Command implements OptionsHolder {
     }
 
     @Override
-    public void addAllOptions(List<Option> options) {
+    public void addAllOptions(Set<Option> options) {
         optionsHolder.addAllOptions(options);
     }
 
     @NoArgsConstructor
-    public static class CommandBuilder {
+    public static class Builder {
         private Operation operation;
-        private List<Option> options = new ArrayList<>();
+        private Set<Option> options = new HashSet<>();
 
-        public CommandBuilder withOption(Option option) {
+        public Builder withOption(Option option) {
             this.options.add(option);
             return this;
         }
 
-        public CommandBuilder withOperation(Operation operation) {
+        public Builder withOperation(Operation operation) {
             this.operation = operation;
             return this;
         }

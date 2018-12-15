@@ -10,7 +10,7 @@ import lombok.Setter;
 
 public class Parser {
     public Command parseCommand(String[] tokens) {
-        Command.CommandBuilder commandBuilder = new Command.CommandBuilder();
+        Command.Builder commandBuilder = new Command.Builder();
         CommandParserState parserState = CommandParserState.START;
         int i = 0;
         while (i < tokens.length) {
@@ -36,13 +36,12 @@ public class Parser {
                 default:
                     // error
             }
-            i++;
         }
         return commandBuilder.build();
     }
 
     private ParseResult<Operation> parseOperation(String[] tokens, int nextTokenPosition) {
-        Operation.OperationBuilder operationBuilder = new Operation.OperationBuilder();
+        Operation.Builder operationBuilder = new Operation.Builder();
 
         if (tokens.length - nextTokenPosition < 2) {
             // error
@@ -195,7 +194,7 @@ public class Parser {
     }
 
     private boolean isValue(String token) {
-        return token.matches("[a-zA-Z0-9].*");
+        return token.matches("[^-].*");
     }
 
     private String getValue(String token) {

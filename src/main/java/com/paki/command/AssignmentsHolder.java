@@ -1,9 +1,9 @@
 package com.paki.command;
 
-import java.util.List;
+import java.util.Set;
 
 public interface AssignmentsHolder {
-    List<Assignment> getAssignments();
+    Set<Assignment> getAssignments();
     void addAssignment(Assignment assignment);
-    void addAllAssignments(List<Assignment> assignments);
+    void addAllAssignments(Set<Assignment> assignments);
 }

@@ -1,9 +1,9 @@
 package com.paki.command;
 
-import java.util.List;
+import java.util.Set;
 
 public interface OptionsHolder {
-    List<Option> getOptions();
+    Set<Option> getOptions();
     void addOption(Option option);
-    void addAllOptions(List<Option> options);
+    void addAllOptions(Set<Option> options);
 }
