@@ -1,9 +1,6 @@
 package com.paki.parser;
 
-import com.paki.command.Assignment;
-import com.paki.command.OperationCommand;
-import com.paki.command.Operation;
-import com.paki.command.Option;
+import com.paki.command.*;
 import org.testng.Assert;
 import org.testng.annotations.*;
 
@@ -21,9 +18,14 @@ public class ParserTest {
     }
 
     @Test(dataProvider = "WellStructuredCommands")
-    public void testParseCommand(String[] tokens, OperationCommand expected) throws CGCParseException{
-        OperationCommand command = (OperationCommand) parser.parseCommand(tokens);
+    public void testParseCommand(String[] tokens, Command expected) throws CGCParseException{
+        Command command = parser.parseCommand(tokens);
         Assert.assertEquals(command, expected);
+    }
+
+    @Test(dataProvider = "PoorlyStructuredCommands", expectedExceptions = CGCParseException.class)
+    public void testParseCommandFail(String[] tokens) throws CGCParseException{
+        parser.parseCommand(tokens);
     }
 
     @DataProvider(name = "WellStructuredCommands")
@@ -63,11 +65,48 @@ public class ParserTest {
         OperationCommand.Builder commandBuilder4 = new OperationCommand.Builder();
         OperationCommand expected4 = commandBuilder4.withOption(option4_1).withOperation(operationBuilder4.build()).build();
 
+        String[] tokens5 = {"--token", "acd123", "--token2", "fgh456", "files", "update", "--file", "file_id", "name=foo.bar", "path=/user/home/foo.bar", "metadata.foo=bar"};
+        Option option5_1 = new Option("token", "acd123");
+        Option option5_2 = new Option("token2", "fgh456");
+        Option option5_3 = new Option("file", "file_id");
+        Assignment assignment5_1 = new Assignment("name", "foo.bar");
+        Assignment assignment5_2 = new Assignment("path", "/user/home/foo.bar");
+        Assignment assignment5_3 = new Assignment("metadata.foo", "bar");
+        Operation.Builder operationBuilder5 = new Operation.Builder();
+        operationBuilder5.withResource("files").withAction("update").withOption(option5_3).withAssignment(assignment5_1).withAssignment(assignment5_2).withAssignment(assignment5_3).build();
+        OperationCommand.Builder commandBuilder5 = new OperationCommand.Builder();
+        OperationCommand expected5 = commandBuilder5.withOption(option5_1).withOption(option5_2).withOperation(operationBuilder5.build()).build();
+
+        String[] tokens6 = {"--help"};
+        Command expected6 = HelpCommand.instance();
+
         return new Object[][] {
                 {tokens1, expected1},
                 {tokens2, expected2},
                 {tokens3, expected3},
-                {tokens4, expected4}
+                {tokens4, expected4},
+                {tokens5, expected5},
+                {tokens6, expected6}
+        };
+    }
+
+    @DataProvider(name = "PoorlyStructuredCommands")
+    public Object[][] poorlyStructuredCommands() {
+        // missing option value
+        String[] tokens1 = {"--optionName", "resourceName", "actionName"};
+
+        // incomplete option
+        String[] tokens2 = {"--optionName1", "--optionName2", "resourceName", "actionName", "--optionName2", "optionValue2", "key=value", "--optionName3", "optionValue3"};
+
+        String[] tokens3 = {"resourceName", "actionName", "somethingRandom"};
+
+        String[] tokens4 = {"acd123", "--option", "update", "--file", "file_id"};
+
+        return new Object[][] {
+                {tokens1},
+                {tokens2},
+                {tokens3},
+                {tokens4}
         };
     }
 

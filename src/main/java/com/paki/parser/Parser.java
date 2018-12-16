@@ -35,6 +35,9 @@ public class Parser {
                     throw new CGCParseException("Command parser encountered an invalid parsing state.");
             }
         }
+        if (parserState != CommandParserState.END) {
+            throw new CGCParseException("Incomplete command.");
+        }
         return commandBuilder.build();
     }
 

@@ -5,6 +5,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
 
 @NoArgsConstructor
@@ -31,6 +32,21 @@ public class OperationCommand implements Command, OptionsHolder {
     @Override
     public String identifier() {
         return getOperation().getResource() + " " + getOperation().getAction();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        OperationCommand that = (OperationCommand) o;
+        return Objects.equals(operation, that.operation) &&
+                Objects.equals(optionsHolder, that.optionsHolder);
+    }
+
+    @Override
+    public int hashCode() {
+
+        return Objects.hash(operation, optionsHolder);
     }
 
     @NoArgsConstructor

@@ -49,13 +49,15 @@ public class Operation implements OptionsHolder, AssignmentsHolder {
         if (o == null || getClass() != o.getClass()) return false;
         Operation operation = (Operation) o;
         return Objects.equals(resource, operation.resource) &&
-                Objects.equals(action, operation.action);
+                Objects.equals(action, operation.action) &&
+                Objects.equals(optionsHolder, operation.optionsHolder) &&
+                Objects.equals(assignmentsHolder, operation.assignmentsHolder);
     }
 
     @Override
     public int hashCode() {
 
-        return Objects.hash(resource, action);
+        return Objects.hash(resource, action, optionsHolder, assignmentsHolder);
     }
 
     public static class Builder {
