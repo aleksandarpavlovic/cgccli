@@ -1,17 +1,10 @@
 package com.paki.executor;
 
 import com.paki.command.Command;
-import com.paki.command.Operation;
-import com.paki.command.Option;
 
 import java.io.IOException;
-import java.util.Collections;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 public class CommandExecutor {
-
-//    CGCDefinitions definitions = CGCDefinitions.getInstance();
 
     public void execute(Command command) {
         HttpExecutor executor;

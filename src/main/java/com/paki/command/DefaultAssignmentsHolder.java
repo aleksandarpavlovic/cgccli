@@ -1,7 +1,6 @@
 package com.paki.command;
 
 import java.util.HashSet;
-import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 
@@ -34,7 +33,6 @@ public class DefaultAssignmentsHolder implements AssignmentsHolder {
 
     @Override
     public int hashCode() {
-
         return Objects.hash(assignments);
     }
 }

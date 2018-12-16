@@ -9,7 +9,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 public class Parser {
-    public Command parseCommand(String[] tokens) {
+    public Command parseCommand(String[] tokens) throws CGCParseException {
         Command.Builder commandBuilder = new Command.Builder();
         CommandParserState parserState = CommandParserState.START;
         int i = 0;
@@ -17,7 +17,9 @@ public class Parser {
             String token = tokens[i];
             switch (parserState) {
                 case START:
-                    if (isOption(token)) {
+                    if (isHelp(token)) {
+                        //
+                    } else if (isOption(token)) {
                         ParseResult<Option> optionParseResult = parseOption(tokens, i);
                         commandBuilder.withOption(optionParseResult.getResult());
                         i = optionParseResult.getNextTokenPosition();
@@ -27,35 +29,34 @@ public class Parser {
                         i = operationParseResult.getNextTokenPosition();
                         parserState = CommandParserState.END;
                     } else {
-                        // error
+                        throw new CGCParseException(String.format("Token: %s does not semantically fit into given command expression.", token));
                     }
                     break;
                 case END:
-                    // error
-                    break;
+                    throw new CGCParseException(String.format("End of command expression expected instead of token: %s.", token));
                 default:
-                    // error
+                    throw new CGCParseException("Command parser encountered an invalid parsing state.");
             }
         }
         return commandBuilder.build();
     }
 
-    private ParseResult<Operation> parseOperation(String[] tokens, int nextTokenPosition) {
+    private ParseResult<Operation> parseOperation(String[] tokens, int nextTokenPosition) throws CGCParseException {
         Operation.Builder operationBuilder = new Operation.Builder();
 
         if (tokens.length - nextTokenPosition < 2) {
-            // error
+            throw new CGCParseException(String.format("Operation parser expects at least 2 arguments, but found only %d.", tokens.length - nextTokenPosition));
         }
         String resourceToken = tokens[nextTokenPosition++];
         if (!isResource(resourceToken)) {
-            // error
+            throw new CGCParseException(String.format("Token: %s is not a valid operation resource.", resourceToken));
         }
         String resource = getResource(resourceToken);
         operationBuilder.withResource(resource);
 
         String actionToken = tokens[nextTokenPosition++];
         if (!isAction(actionToken)) {
-            // error
+            throw new CGCParseException(String.format("Token: %s is not a valid operation action.", actionToken));
         }
         String action = getAction(actionToken);
         operationBuilder.withAction(action);
@@ -70,100 +71,43 @@ public class Parser {
                 operationBuilder.withAssignment(assignmentParseResult.getResult());
                 nextTokenPosition = assignmentParseResult.getNextTokenPosition();
             } else {
-                // error
+                throw new CGCParseException(String.format("Token: %s does not semantically fit into given operation expression. Operation parser expects either an option or an assignment.", tokens[nextTokenPosition]));
             }
         }
 
         return new ParseResult<>(operationBuilder.build(), nextTokenPosition);
     }
 
-    private ParseResult<Option> parseOption(String[] tokens, int nextTokenPosition) {
+    private ParseResult<Option> parseOption(String[] tokens, int nextTokenPosition) throws CGCParseException {
         if (tokens.length - nextTokenPosition < 2) {
-            // error
+            throw new CGCParseException(String.format("Option parser expects at least 2 arguments, but found only %d.", tokens.length - nextTokenPosition));
         }
         String optNameToken = tokens[nextTokenPosition++];
         if (!isOption(optNameToken)) {
-            // error
+            throw new CGCParseException(String.format("Token: %s is not a valid option name.", optNameToken));
         }
         String optionName = getOption(optNameToken);
 
         String optValToken = tokens[nextTokenPosition++];
         if (!isValue(optValToken)) {
-            // error
+            throw new CGCParseException(String.format("Token: %s is not a valid option value.", optValToken));
         }
         String optionValue = getValue(optValToken);
 
         return new ParseResult<>(new Option(optionName, optionValue), nextTokenPosition);
     }
 
-    private ParseResult<Assignment> parseAssignment(String[] tokens, int nextTokenPosition) {
+    private ParseResult<Assignment> parseAssignment(String[] tokens, int nextTokenPosition) throws CGCParseException {
         if (tokens.length <= nextTokenPosition) {
-            // error
+            throw new CGCParseException("Assignment parsing error. No assignment token found.");
         }
         String[] split = tokens[nextTokenPosition++].split("=");
         return new ParseResult<>(new Assignment(split[0], split[1]), nextTokenPosition);
     }
 
-//    public Command parse(String[] tokens) {
-//        State parserState = State.START;
-//        for (String token: tokens) {
-//            switch(parserState) {
-//                case START:
-//                    if (isOption(token)) {
-//                        // command.setOption
-//                        parserState = State.COMMAND_OPTION;
-//                    } else if (isResource(token)) {
-//                        // operatoin.setResource
-//                        parserState = State.OPERATION_RESOURCE;
-//                    } else {
-//                        // error
-//                    }
-//                    break;
-//                case COMMAND_OPTION:
-//                    if (isValue(token)) {
-//                        // command.setOptionValue
-//                        parserState = State.START;
-//                    } else {
-//                        // error
-//                    }
-//                    break;
-//                case OPERATION_RESOURCE:
-//                    if (isAction(token)) {
-//                        // operation.setAction
-//                        parserState = State.OPERATION_ACTION;
-//                    } else {
-//                        // error
-//                    }
-//                    break;
-//                case OPERATION_ACTION:
-//                    if (isAssignment(token)) {
-//                        // operation.setAssignment
-//                    } else if (isOption(token)) {
-//                        // operation.setOption
-//                        parserState = State.OPERATION_OPTION;
-//                    } else {
-//                        // error
-//                    }
-//                    break;
-//                case OPERATION_OPTION:
-//                    if (isValue(token)) {
-//                        // operation.setOptionValue
-//                        parserState = State.START;
-//                    } else {
-//                        // error
-//                    }
-//                    break;
-//                default:
-//                    throw new IllegalStateException();
-//            }
-//        }
-//
-//        if (parserState != State.OPERATION_ACTION) {
-//            // nelegalan izraz
-//        }
-//
-//        return null;
-//    }
+    private boolean isHelp(String token) {
+        return token.equals("--help");
+    }
 
     private boolean isOption(String token) {
         return token.startsWith("--");
@@ -207,10 +151,6 @@ public class Parser {
             return false;
         return isWord(subtokens[0]) && isValue(subtokens[1]);
     }
-
-//    private enum State {
-//        START, COMMAND_OPTION, OPERATION_RESOURCE, OPERATION_ACTION, OPERATION_OPTION, END
-//    }
 
     private enum CommandParserState {
         START, END
