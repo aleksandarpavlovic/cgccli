@@ -1,16 +1,13 @@
 package com.paki.parser;
 
-import com.paki.command.Assignment;
-import com.paki.command.Command;
-import com.paki.command.Operation;
-import com.paki.command.Option;
+import com.paki.command.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 
 public class Parser {
     public Command parseCommand(String[] tokens) throws CGCParseException {
-        Command.Builder commandBuilder = new Command.Builder();
+        OperationCommand.Builder commandBuilder = new OperationCommand.Builder();
         CommandParserState parserState = CommandParserState.START;
         int i = 0;
         while (i < tokens.length) {
@@ -18,7 +15,7 @@ public class Parser {
             switch (parserState) {
                 case START:
                     if (isHelp(token)) {
-                        //
+                        return HelpCommand.instance();
                     } else if (isOption(token)) {
                         ParseResult<Option> optionParseResult = parseOption(tokens, i);
                         commandBuilder.withOption(optionParseResult.getResult());
